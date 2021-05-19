@@ -52,7 +52,7 @@ while($list = $db->fetch_array($query)) {
                     LEFT JOIN ".TABLE_PREFIX."usergroups ug
                     ON ug.gid = u.usergroup
                     WHERE uf.". $fid ." = '$resfid'
-                    AND ug.showinlists = 1"
+                    AND ug.showinlists = 1 "
                     . $sql_filter . " 
                     ORDER BY u.username ASC");
                     while($user_result = $db->fetch_array($query_3)) {
@@ -81,7 +81,7 @@ while($list = $db->fetch_array($query)) {
                     LEFT JOIN ".TABLE_PREFIX."usergroups ug
                     ON ug.gid = u.usergroup
                     WHERE uf.". $fid ." LIKE '%$option%'
-                    AND ug.showinlists = 1"
+                    AND ug.showinlists = 1 "
                     . $sql_filter . " 
                     ORDER BY u.username ASC");
                     while($user_result = $db->fetch_array($query_3)) {
