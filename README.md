@@ -20,7 +20,7 @@ Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt
 <center>
   <img src="https://snipboard.io/RgMUqm.jpg" />
   
-  <img src="https://snipboard.io/LvQP4B.jpg" />
+  <img src="https://snipboard.io/ZFkuEl.jpg" />
   
   <img src="https://snipboard.io/9Y5GRr.jpg" />
   
