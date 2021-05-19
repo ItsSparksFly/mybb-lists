@@ -82,6 +82,14 @@ function lists_install() {
 function lists_activate() {
     global $db;
 
+    // Add templategroup
+    $templategrouparray = [
+        'prefix' => 'lists',
+        'title'  => $db->escape_string($lang->lists_templates),
+        'isdefault' => 1
+    ];
+    $db->insert_query("templategroups", $templategrouparray);
+
     $lists = [
         'title' => 'lists',
         'template' => $db->escape_string('<html>
@@ -103,7 +111,7 @@ function lists_activate() {
 		{$footer}
 		</body>
 		</html>'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -121,7 +129,7 @@ function lists_activate() {
         </tbody>
         </table>
     </td>'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -132,7 +140,7 @@ function lists_activate() {
         'template' => $db->escape_string('<tr>
 		<td class="trow1 smalltext"><a href="lists.php?action={$list[\'key\']}">{$list[\'name\']}</a></td>
 </tr>'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -161,7 +169,7 @@ function lists_activate() {
 		{$footer}
 		</body>
 		</html>'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -171,7 +179,7 @@ function lists_activate() {
         'title' => 'lists_list_bit',
         'template' => $db->escape_string('<h2>{$option}</h2>
         {$list_bit_user}'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -180,7 +188,7 @@ function lists_activate() {
     $lists_list_bit_user = [
         'title' => 'lists_list_bit_user',
         'template' => $db->escape_string('{$profilelink} {$extrainfo}<br />'),
-        'sid' => '-1',
+        'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
     ];
@@ -219,7 +227,8 @@ function lists_uninstall() {
 
 function lists_deactivate() {
     global $db;
-    $db->delete_query("templates", "title LIKE 'lists_%'");
+    $db->delete_query("templategroups", "prefix = 'lists'");
+    $db->delete_query("templates", "title LIKE 'lists%'");
 }
 
 function lists_admin_config_action_handler(&$actions)
@@ -429,6 +438,7 @@ EOF;
                 $fields[-1] = $lang->lists_usergroup;
                 $fields[-2] = $lang->lists_additionalgroup;
                 $fields[-3] = $lang->lists_displaygroup;
+                $fields[-4] = $lang->lists_username;
 
                 $form_container->output_row(
                     $lang->lists_create_fid, 
@@ -577,6 +587,7 @@ EOF;
             $fields[-1] = $lang->lists_usergroup;
             $fields[-2] = $lang->lists_additionalgroup;
             $fields[-3] = $lang->lists_displaygroup;
+            $fields[-4] = $lang->lists_username;
 
             $form_container->output_row(
                 $lang->lists_create_fid, 

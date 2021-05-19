@@ -98,32 +98,110 @@ while($list = $db->fetch_array($query)) {
             }
 
         } else {
-            $grouptypes = ["-1" => "usergroup", "-2" => "additionalgroups", "-3" => "displaygroup"];
-            $group = $list['fid'];
-            $group = $grouptypes[$group];
-            if(!empty($list['filter'])) {
-                $filter = $list['filter'];
-                $query_2 = $db->simple_select("usergroups", "title,gid", "title = '{$filter}'");
-            } else {
-                $query_2 = $db->simple_select("usergroups", "title,gid", "showinlists = '1'", ["order_by" => "title", "order_dir" => "ASC"]);
-            }
-            while($result = $db->fetch_array($query_2)) {
-                $list_bit_user = "";
-                $resfid = $result['title'];
-                $resgid = $result['gid'];
-                $option = $result['title'];
-                $query_3 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
-                    WHERE " . $group ." = '{$resgid}'
-                    ORDER BY u.username ASC");
-                    while($user_result = $db->fetch_array($query_3)) {
-                        $extrainfo = "";
-                        $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
-                        // any extra information required? 
-                        if($list['extras']) {
-                            $extrainfo = get_extras($user_result['uid'], $list['extras']);
+            if($list['fid'] != -4) {
+                $grouptypes = ["-1" => "usergroup", "-2" => "additionalgroups", "-3" => "displaygroup"];
+                $group = $list['fid'];
+                $group = $grouptypes[$group];
+                if(!empty($list['filter'])) {
+                    $filter = $list['filter'];
+                    $query_2 = $db->simple_select("usergroups", "title,gid", "title = '{$filter}'");
+                } else {
+                    $query_2 = $db->simple_select("usergroups", "title,gid", "showinlists = '1'", ["order_by" => "title", "order_dir" => "ASC"]);
+                }
+                while($result = $db->fetch_array($query_2)) {
+                    $list_bit_user = "";
+                    $resfid = $result['title'];
+                    $resgid = $result['gid'];
+                    $option = $result['title'];
+                    $query_3 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                        WHERE " . $group ." = '{$resgid}'
+                        ORDER BY u.username ASC");
+                        while($user_result = $db->fetch_array($query_3)) {
+                            $extrainfo = "";
+                            $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
+                            // any extra information required? 
+                            if($list['extras']) {
+                                $extrainfo = get_extras($user_result['uid'], $list['extras']);
+                            }
+                            eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
                         }
-                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
+                }
+            } else {
+                $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                LEFT JOIN ".TABLE_PREFIX."usergroups ug
+                ON u.usergroup = ug.gid
+                WHERE showinlists = '1'
+                AND username >= 'A'
+                AND username <= 'F'
+                ORDER by username ASC");
+                $option = "A - F";
+                $list_bit_user = "";
+                while($result = $db->fetch_array($query_2)) {
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    // any extra information required? 
+                    if($list['extras']) {
+                        $extrainfo = get_extras($result['uid'], $list['extras']);
                     }
+                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                }
+                eval("\$list_bit = \"".$templates->get("lists_list_bit")."\";");
+
+                $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                LEFT JOIN ".TABLE_PREFIX."usergroups ug
+                ON u.usergroup = ug.gid
+                WHERE showinlists = '1'
+                AND username >= 'G'
+                AND username <= 'L'
+                ORDER by username ASC");
+                $option = "G - L";
+                $list_bit_user = "";
+                while($result = $db->fetch_array($query_2)) {
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    // any extra information required? 
+                    if($list['extras']) {
+                        $extrainfo = get_extras($result['uid'], $list['extras']);
+                    }
+                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                }
+                eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
+
+                $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                LEFT JOIN ".TABLE_PREFIX."usergroups ug
+                ON u.usergroup = ug.gid
+                WHERE showinlists = '1'
+                AND username >= 'M'
+                AND username <= 'R'
+                ORDER by username ASC");
+                $option = "M - R";
+                $list_bit_user = "";
+                while($result = $db->fetch_array($query_2)) {
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    // any extra information required? 
+                    if($list['extras']) {
+                        $extrainfo = get_extras($result['uid'], $list['extras']);
+                    }
+                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                }
+                eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
+
+                $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                LEFT JOIN ".TABLE_PREFIX."usergroups ug
+                ON u.usergroup = ug.gid
+                WHERE showinlists = '1'
+                AND username >= 'T'
+                AND username <= 'Z'
+                ORDER by username ASC");
+                $option = "T - Z";
+                $list_bit_user = "";
+                while($result = $db->fetch_array($query_2)) {
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    // any extra information required? 
+                    if($list['extras']) {
+                        $extrainfo = get_extras($result['uid'], $list['extras']);
+                    }
+                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                }
                 eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
             }
         }
@@ -152,21 +230,23 @@ function get_extras($uid, $extras) {
             $content = $db->fetch_field($db->simple_select("userfields", $exfid, "ufid = {$uid}"), $exfid);
             $extrainfo .= "&raquo; " . $content . " ";
         } else {
-            $group = $grouptypes[$extra];
-            $groupid = $db->fetch_field($db->simple_select("users", $group, "uid = '{$uid}'"), $group);
-            if($extra == -2 && !empty($groupid)) {
-                $additionalgroups = explode(",", $groupid);
-                foreach($additionalgroups as $additionalgroup) {
-                    $groupname = $db->fetch_field($db->simple_select("usergroups", "title", "gid = '{$additionalgroup}'"), "title");  
-                    $extrainfo .= "&raquo; " . $groupname . " ";
-                }               
-            } else {
-                $groupname = $db->fetch_field($db->simple_select("usergroups", "title", "gid = '{$groupid}'"), "title");
-                if(!empty($groupname)) {
-                    $extrainfo .= "&raquo; " . $groupname . " ";
+            if($extra != -4) {
+                $group = $grouptypes[$extra];
+                $groupid = $db->fetch_field($db->simple_select("users", $group, "uid = '{$uid}'"), $group);
+                if($extra == -2 && !empty($groupid)) {
+                    $additionalgroups = explode(",", $groupid);
+                    foreach($additionalgroups as $additionalgroup) {
+                        $groupname = $db->fetch_field($db->simple_select("usergroups", "title", "gid = '{$additionalgroup}'"), "title");  
+                        $extrainfo .= "&raquo; " . $groupname . " ";
+                    }               
+                } else {
+                    $groupname = $db->fetch_field($db->simple_select("usergroups", "title", "gid = '{$groupid}'"), "title");
+                    if(!empty($groupname)) {
+                        $extrainfo .= "&raquo; " . $groupname . " ";
+                    }
                 }
             }
-        }
+        }   
     }  
     return $extrainfo;
 }

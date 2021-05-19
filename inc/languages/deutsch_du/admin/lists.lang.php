@@ -5,6 +5,8 @@ $l['lists_short_desc'] = "Ermöglicht das einfache Generieren automatischer List
 
 $l['lists_permission'] = "Kann automatische Listen anlegen?";
 
+$l['lists_templates'] = "Listen";
+
 // create lists - form
 $l['lists_create_name'] = "Name";
 $l['lists_create_name_desc'] = "Welchen Namen soll deine Liste bekommen? Um welche Art von Liste handelt es sich? Der Name der Liste wird sowohl in der Listennavigation, als auch ganz oben in der Liste als Titel auftauchen.";
@@ -39,3 +41,4 @@ $l['lists_deleted'] = "Die Liste wurde gelöscht.";
 $l['lists_usergroup'] = "Usergruppe";
 $l['lists_additionalgroup'] = "Sekundärgruppe";
 $l['lists_displaygroup'] = "Anzeigegruppe";
+$l['lists_username'] = "Benutzername";
