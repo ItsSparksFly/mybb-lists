@@ -57,6 +57,7 @@ function lists_install() {
             `fid` varchar(5) NOT NULL DEFAULT '', 
             `filter` varchar(255) NOT NULL DEFAULT '', 
             `extras` varchar(255) NOT NULL DEFAULT '', 
+            `sortby` varchar(255) NOT NULL DEFAULT 'username', 
             PRIMARY KEY (lid)
         ) ENGINE=MyISAM{$collation};
     ");
@@ -352,7 +353,8 @@ function lists_manage_lists() {
                         "key" => $db->escape_string($mybb->input['key']),
                         "fid" => $db->escape_string($mybb->input['fid']),
                         "filter" => $db->escape_string($mybb->input['filter']),
-                        "extras" => $extralist
+                        "extras" => $extralist,
+                        "sortby" => $db->escape_string($mybb->input['sorted']),
                     ];
 
                     $db->insert_query("lists", $new_list);
@@ -429,16 +431,20 @@ EOF;
                 );
 
                 $fields = [];
+                $sort = [];
+                $sort["username"] = $lang->lists_username;
                 $query = $db->simple_select("profilefields", "fid,name");
                 while($result = $db->fetch_array($query)) {
                     $fid = $result['fid'];
                     $fields[$fid] = $result['name'];
+                    $sort[$fid] = $result['name'];
                 }
 
                 $fields[-1] = $lang->lists_usergroup;
                 $fields[-2] = $lang->lists_additionalgroup;
                 $fields[-3] = $lang->lists_displaygroup;
                 $fields[-4] = $lang->lists_username;
+
 
                 $form_container->output_row(
                     $lang->lists_create_fid, 
@@ -454,6 +460,16 @@ EOF;
                         $lang->lists_create_filter_desc,
                         $form->generate_text_box('filter', $mybb->input['filter'])
                     );
+            
+                    $form_container->output_row(
+                        $lang->lists_create_sortby, 
+                        $lang->lists_create_sortby_desc, 
+                        $form->generate_select_box('sorted', 
+                            $sort, 
+                            '', 
+                            array('id' => 'sort')),
+                        'sorted');
+    
 
                     $form_container->output_row(
                         $lang->lists_create_extras, 
@@ -499,7 +515,8 @@ EOF;
                         "key" => $db->escape_string($mybb->input['key']),
                         "fid" => $db->escape_string($mybb->input['fid']),
                         "filter" => $db->escape_string($mybb->input['filter']),
-                        "extras" => $extralist
+                        "extras" => $extralist,
+                        "sortby" => $db->escape_string($mybb->input['sorted'])
                     ];
 
                     $db->update_query("lists", $edited_list, "lid='{$lid}'");
@@ -578,10 +595,13 @@ EOF;
             );
 
             $fields = [];
+            $sortby = [];
+            $sortby["username"] = $lang->lists_username;
             $query = $db->simple_select("profilefields", "fid,name");
             while($result = $db->fetch_array($query)) {
                 $fid = $result['fid'];
                 $fields[$fid] = $result['name'];
+                $sortby[$fid] = $result['name'];
             }
 
             $fields[-1] = $lang->lists_usergroup;
@@ -614,6 +634,15 @@ EOF;
                         $extralist, 
                         array('id' => 'fid', 'multiple' => true, 'size' => 5)),
                     'extras');
+
+                    $form_container->output_row(
+                        $lang->lists_create_sortby, 
+                        $lang->lists_create_sortby_desc, 
+                        $form->generate_select_box('sorted', 
+                            $sortby, 
+                            $edit_list['sortby'], 
+                            array('id' => 'sorted')),
+                        'sorted');
  
             $form_container->end();
             $buttons[] = $form->generate_submit_button($lang->lists_create_edit);

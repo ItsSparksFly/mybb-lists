@@ -22,7 +22,25 @@ if(!$mybb->input['action']) {
 $query = $db->simple_select("lists", "*");
 while($list = $db->fetch_array($query)) {
     if($mybb->input['action'] == $list['key']) {
+        // Format Entries
+        require_once MYBB_ROOT."inc/class_parser.php";
+        $parser = new postParser;
+        $parser_options = array(
+            "allow_html" => 1,
+            "allow_mycode" => 1,
+            "allow_smilies" => 1,
+            "allow_imgcode" => 1
+        );
+
+        $list['text'] = $parser->parse_message($list['text'], $parser_options);    
         // let's build queries! 
+
+        if(!empty($list['sortby'])) {
+            $sort = $list['sortby'];
+            if(!preg_match("/username/i", $list['sortby'])) {
+                $sort = "fid" . $list['sortby'];
+            }
+        } if(empty($list['sortby'])) { $sort = "username"; }
 
         if(!preg_match("/-/i", $list['fid'])) {
             $fieldtype = get_fieldtype($list['fid']);
@@ -42,10 +60,12 @@ while($list = $db->fetch_array($query)) {
                 ORDER BY ". $fid ." ASC");
                 // now get users matching entry
                 while($result = $db->fetch_array($query_2)) {
-                    $option = $result['name'];
                     $list_bit_user = "";
                     $resfid = $result[$fid];
-                    $option = $resfid;
+                    if(!empty($filter)) {
+                        $option = "";
+                    } else {
+                    $option = $resfid; }
                     $query_3 = $db->query("SELECT ufid, username FROM ".TABLE_PREFIX."userfields uf
                     LEFT JOIN ".TABLE_PREFIX."users u 
                     ON u.uid = uf.ufid
@@ -54,7 +74,7 @@ while($list = $db->fetch_array($query)) {
                     WHERE uf.". $fid ." = '$resfid'
                     AND ug.showinlists = 1 "
                     . $sql_filter . " 
-                    ORDER BY u.username ASC");
+                    ORDER BY " . $sort ." ASC");
                     while($user_result = $db->fetch_array($query_3)) {
                         $extrainfo = "";
                         $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
@@ -75,27 +95,32 @@ while($list = $db->fetch_array($query)) {
                 $options = explode("\n", $type);
                 array_shift($options);
                 foreach($options as $option) {
-                    $list_bit_user = "";
-                    $query_3 = $db->query("SELECT ufid, username FROM ".TABLE_PREFIX."userfields uf
-                    LEFT JOIN ".TABLE_PREFIX."users u 
-                    ON u.uid = uf.ufid
-                    LEFT JOIN ".TABLE_PREFIX."usergroups ug
-                    ON ug.gid = u.usergroup
-                    WHERE uf.". $fid ." LIKE '%$option%'
-                    AND ug.showinlists = 1 "
-                    . $sql_filter . " 
-                    ORDER BY u.username ASC");
-                    while($user_result = $db->fetch_array($query_3)) {
-                        $extrainfo = "";
-                        $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
-                        $listuser = get_user($user_result['ufid']);
-                        // any extra information required? 
-                        if($list['extras']) {
-                            $extrainfo = get_extras($user_result['ufid'], $list['extras']);
+                    if(preg_match("/$filter/i", $option)) {
+                        $list_bit_user = "";
+                        $query_3 = $db->query("SELECT ufid, username FROM ".TABLE_PREFIX."userfields uf
+                        LEFT JOIN ".TABLE_PREFIX."users u 
+                        ON u.uid = uf.ufid
+                        LEFT JOIN ".TABLE_PREFIX."usergroups ug
+                        ON ug.gid = u.usergroup
+                        WHERE uf.". $fid ." LIKE '%$option%'
+                        AND ug.showinlists = 1 "
+                        . $sql_filter . " 
+                        ORDER BY " . $sort . " ASC");
+                        while($user_result = $db->fetch_array($query_3)) {
+                            $extrainfo = "";
+                            $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
+                            $listuser = get_user($user_result['ufid']);
+                            // any extra information required? 
+                            if($list['extras']) {
+                                $extrainfo = get_extras($user_result['ufid'], $list['extras']);
+                            }
+                            if(!empty($filter)) {
+                                $option = "";
+                            }
+                            eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
                         }
-                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                        eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
                     }
-                    eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
                 }
             }
 
@@ -106,7 +131,7 @@ while($list = $db->fetch_array($query)) {
                 $group = $grouptypes[$group];
                 if(!empty($list['filter'])) {
                     $filter = $list['filter'];
-                    $query_2 = $db->simple_select("usergroups", "title,gid", "title = '{$filter}'");
+                    $query_2 = $db->simple_select("usergroups", "title,gid", "title LIKE '%{$filter}%'");
                 } else {
                     $query_2 = $db->simple_select("usergroups", "title,gid", "showinlists = '1'", ["order_by" => "title", "order_dir" => "ASC"]);
                 }
@@ -114,10 +139,15 @@ while($list = $db->fetch_array($query)) {
                     $list_bit_user = "";
                     $resfid = $result['title'];
                     $resgid = $result['gid'];
-                    $option = $result['title'];
+                    if(!empty($filter)) {
+                        $option = "";
+                    } else {
+                    $option = $result['title']; }
                     $query_3 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
+                        LEFT JOIN ".TABLE_PREFIX."userfields uf 
+                        ON u.uid = uf.ufid
                         WHERE " . $group ." = '{$resgid}'
-                        ORDER BY u.username ASC");
+                        ORDER BY " . $sort ." ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
                             $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
@@ -134,10 +164,12 @@ while($list = $db->fetch_array($query)) {
                 $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                 LEFT JOIN ".TABLE_PREFIX."usergroups ug
                 ON u.usergroup = ug.gid
+                LEFT JOIN ".TABLE_PREFIX."userfields uf 
+                ON u.uid = uf.ufid
                 WHERE showinlists = '1'
-                AND username >= 'A'
-                AND username <= 'F'
-                ORDER by username ASC");
+                AND " . $sort . " >= 'A'
+                AND " . $sort . " <= 'F'
+                ORDER by " . $sort . " ASC");
                 $option = "A - F";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
@@ -147,17 +179,21 @@ while($list = $db->fetch_array($query)) {
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
                     }
-                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    if(!empty($extrainfo)) {
+                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    }
                 }
                 eval("\$list_bit = \"".$templates->get("lists_list_bit")."\";");
 
                 $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                 LEFT JOIN ".TABLE_PREFIX."usergroups ug
                 ON u.usergroup = ug.gid
+                LEFT JOIN ".TABLE_PREFIX."userfields uf 
+                ON u.uid = uf.ufid
                 WHERE showinlists = '1'
-                AND username >= 'G'
-                AND username <= 'L'
-                ORDER by username ASC");
+                AND " . $sort . " >= 'G'
+                AND " . $sort . " <= 'L'
+                ORDER by " . $sort . " ASC");
                 $option = "G - L";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
@@ -167,17 +203,21 @@ while($list = $db->fetch_array($query)) {
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
                     }
-                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    if(!empty($extrainfo)) {
+                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    }
                 }
                 eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
 
                 $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                 LEFT JOIN ".TABLE_PREFIX."usergroups ug
                 ON u.usergroup = ug.gid
+                LEFT JOIN ".TABLE_PREFIX."userfields uf 
+                ON u.uid = uf.ufid
                 WHERE showinlists = '1'
-                AND username >= 'M'
-                AND username <= 'R'
-                ORDER by username ASC");
+                AND " . $sort . " >= 'M'
+                AND " . $sort . " <= 'R'
+                ORDER by " . $sort . " ASC");
                 $option = "M - R";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
@@ -187,17 +227,21 @@ while($list = $db->fetch_array($query)) {
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
                     }
-                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    if(!empty($extrainfo)) {
+                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    }
                 }
                 eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
 
                 $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                 LEFT JOIN ".TABLE_PREFIX."usergroups ug
                 ON u.usergroup = ug.gid
+                LEFT JOIN ".TABLE_PREFIX."userfields uf 
+                ON u.uid = uf.ufid
                 WHERE showinlists = '1'
-                AND username >= 'T'
-                AND username <= 'Z'
-                ORDER by username ASC");
+                AND " . $sort . " >= 'T'
+                AND " . $sort . " <= 'Z'
+                ORDER by " . $sort . " ASC");
                 $option = "T - Z";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
@@ -207,7 +251,9 @@ while($list = $db->fetch_array($query)) {
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
                     }
-                    eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    if(!empty($extrainfo)) {
+                        eval("\$list_bit_user .= \"".$templates->get("lists_list_bit_user")."\";");
+                    }
                 }
                 eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
             }
@@ -235,7 +281,9 @@ function get_extras($uid, $extras) {
         $exfid = "fid".$extra;
         if(!preg_match("/-/i", $extra)) {
             $content = $db->fetch_field($db->simple_select("userfields", $exfid, "ufid = {$uid}"), $exfid);
-            $extrainfo .= "&raquo; " . $content . " ";
+            if(!empty($content)) {
+                $extrainfo .= "&raquo; " . $content . " ";
+            }
         } else {
             if($extra != -4) {
                 $group = $grouptypes[$extra];
