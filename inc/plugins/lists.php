@@ -78,6 +78,141 @@ function lists_install() {
      } 
      $cache->update_usergroups();
 
+     $setting_group = array(
+	    'name' => 'lists',
+	    'title' => "Automatische Listen",
+	    'description' => "Einstellungen für das automatische Listen-Plugin",
+	    'disporder' => 1,
+	    'isdefault' => 0
+	);
+
+	$gid = $db->insert_query("settinggroups", $setting_group);
+
+	$setting_array = array(
+	    // A text setting
+	    'lists_uids' => array(
+	        'title' => "User ignorieren",
+	        'description' => "Gib die IDs der User an, die nicht in automatischen Listen angezeigt werden sollen - das ist z.B. für Admin-Accounts sinnvoll. Trenne die User-IDs mit Kommas.",
+	        'optionscode' => 'text',
+	        'value' => '', // Default
+	        'disporder' => 1
+	    ),
+	);
+
+	foreach($setting_array as $name => $setting)
+	{
+	    $setting['name'] = $name;
+	    $setting['gid'] = $gid;
+
+	    $db->insert_query('settings', $setting);
+	}
+
+	rebuild_settings();
+
+       // CSS  
+	   $css = array(
+        'name' => 'lists.css',
+        'tid' => 1,
+        "stylesheet" => '.lists {
+            width: 100%;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            /* align-items: flex-start; Wenn du willst, dass das Menü in der Länge nicht mit dem Content-Block mitwächst. Ich empfehle dir, *hier dann das padding einzufügen, damit es nicht mit dem letzten Strich endet. */
+        }
+        
+        /*         Menu        */
+        
+        .lists_menu {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #efefef;
+            align-items: flex-start;
+        /* padding-bottom: 10px; * Hier nutzen, wenn du nicht willst, dass das Menü dieselbe Länge hat wie der Content-Block. */
+        }
+        
+        .lists_menu-head {
+            height: 50px;
+            width: 100%;
+            background: #b8b8b8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .lists_menu-item {
+            height: 25px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            border-bottom: 1px solid #b4b4b4;
+        }
+        
+        
+        /*         Content       */
+        
+        
+        .lists_content {
+            width: 80%;
+            box-sizing: border-box;
+            background: #efefef;
+        }
+        
+        .lists_content-head {
+            height: 50px;
+            width: 100%;
+            background: #b8b8b8;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .lists_content-description {
+            padding: 20px 40px;
+            text-align: justify;
+            line-height: 180%;
+        }
+        
+        .lists_content-bit {    
+            padding: 0 40px 40px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .lists_content-block {
+            width: 45%;    /* Wenn du drei Spalten willst, gib hier 30% an. Beachte, dass du diesen Wert je nach Breite des Forums und des Inhalts anpassen musst, um ein zufriedenstellendes Ergebnis zu erhalten. */
+        }
+        
+        .lists_content-item {
+            margin-bottom: 5px;
+        }',
+        'cachefile' => $db->escape_string(str_replace('/', '', 'lists.css')),
+        'lastmodified' => time(),
+        'attachedto' => ''
+    );
+
+    require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
+
+    $sid = $db->insert_query("themestylesheets", $css);
+    $db->update_query("themestylesheets", array("cachefile" => "css.php?stylesheet=".$sid), "sid = '".$sid."'", 1);
+
+    $tids = $db->simple_select("themes", "tid");
+    while($theme = $db->fetch_array($tids)) {
+        update_theme_stylesheet_list($theme['tid']);
+    }
+
 }
 
 function lists_activate() {
@@ -86,7 +221,7 @@ function lists_activate() {
     // Add templategroup
     $templategrouparray = [
         'prefix' => 'lists',
-        'title'  => $db->escape_string($lang->lists_templates),
+        'title'  => "Listen",
         'isdefault' => 1
     ];
     $db->insert_query("templategroups", $templategrouparray);
@@ -94,24 +229,27 @@ function lists_activate() {
     $lists = [
         'title' => 'lists',
         'template' => $db->escape_string('<html>
-		<head>
-		<title>{$mybb->settings[\'bbname\']} - {$lang->lists}</title>
-		{$headerinclude}</head>
-		<body>
-		{$header}
-			<table width="100%" cellspacing="5" cellpadding="5">
-				<tr>
-					{$menu}
-					<td valign="top" class="trow1">
-						<div style="text-align: justify; width: 70%; margin: 20px auto;">
-							{$lang->lists_desc} 
-						</div>
-					</td>
-				</tr>
-			</table>
-		{$footer}
-		</body>
-		</html>'),
+        <head>
+        <title>{$mybb->settings[\'bbname\']} - {$lang->lists}</title>
+        {$headerinclude}</head>
+        <body>
+        {$header}
+            <table width="100%" cellspacing="5" cellpadding="5">
+                <tr>
+                    <td valign="top">
+                        <div class="lists">
+                    {$menu}
+                    
+                        <div class="lists_content">
+                            <div class="lists_content-description">{$lang->lists_desc} </div>
+                        </div>
+                    </div>
+                    </td>
+                </tr>
+            </table>
+        {$footer}
+        </body>
+        </html>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -120,16 +258,12 @@ function lists_activate() {
 
     $lists_menu = [
         'title' => 'lists_menu',
-        'template' => $db->escape_string('<td width="20%" valign="top">
-        <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-        <tbody>
-            <tr>
-                <td class="thead"><strong><a href="lists.php">{$lang->lists}</a></strong></td>
-            </tr>
-            {$menu_bit}
-        </tbody>
-        </table>
-    </td>'),
+        'template' => $db->escape_string('<div class="lists_menu">
+        <div class="lists_menu-head">
+            <a href="lists.php">{$lang->lists}</a>
+        </div>            
+        {$menu_bit}
+        </div>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -138,9 +272,7 @@ function lists_activate() {
 
     $lists_menu_bit = [
         'title' => 'lists_menu_bit',
-        'template' => $db->escape_string('<tr>
-		<td class="trow1 smalltext"><a href="lists.php?action={$list[\'key\']}">{$list[\'name\']}</a></td>
-</tr>'),
+        'template' => $db->escape_string('<div class="lists_menu-item"><a href="lists.php?action={$list[\'key\']}">{$list[\'name\']}</a></div>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -150,26 +282,31 @@ function lists_activate() {
     $lists_list = [
         'title' => 'lists_list',
         'template' => $db->escape_string('<html>
-		<head>
-		<title>{$mybb->settings[\'bbname\']} - {$list[\'name\']}</title>
-		{$headerinclude}</head>
-		<body>
-		{$header}
-			<table width="100%" cellspacing="5" cellpadding="5">
-				<tr>
-					{$menu}
-					<td valign="top" class="trow1">
-						<div style="text-align: justify; width: 85%; margin: 20px auto;">
-                        <h1>{$list[\'name\']}</h1>
-							{$list[\'text\']} <br /><br />
+        <head>
+        <title>{$mybb->settings[\'bbname\']} - {$lang->lists}</title>
+        {$headerinclude}</head>
+        <body>
+        {$header}
+            <table width="100%" cellspacing="5" cellpadding="0">
+                <tr>
+                    <td valign="top">
+                        <div class="lists">
+                    {$menu}
+                    
+                        <div class="lists_content">
+                            <div class="lists_content-head">{$list[\'name\']}</div>
+                            <div class="lists_content-description">{$list[\'text\']} </div>
+                            <div class="lists_content-bit">
                             {$list_bit}
-						</div>
-					</td>
-				</tr>
-			</table>
-		{$footer}
-		</body>
-		</html>'),
+                        </div>
+                            </div>
+                    </div>
+                    </td>
+                </tr>
+            </table>
+        {$footer}
+        </body>
+        </html>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -178,8 +315,10 @@ function lists_activate() {
 
     $lists_list_bit = [
         'title' => 'lists_list_bit',
-        'template' => $db->escape_string('<h2>{$option}</h2>
-        {$list_bit_user}'),
+        'template' => $db->escape_string('    <div class="lists_content-block">
+        <h2>{$option}</h2>
+                {$list_bit_user}
+        </div>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -188,7 +327,7 @@ function lists_activate() {
 
     $lists_list_bit_user = [
         'title' => 'lists_list_bit_user',
-        'template' => $db->escape_string('{$profilelink} {$extrainfo}<br />'),
+        'template' => $db->escape_string('<div class="lists_content-item">{$profilelink} {$extrainfo}</div>'),
         'sid' => '-2',
         'version' => '',
         'dateline' => TIME_NOW
@@ -224,6 +363,20 @@ function lists_uninstall() {
 	{
     	$db->drop_column("usergroups", "showinlists");
 	}
+
+	$db->delete_query('settings', "name IN ('lists_uids')");
+	$db->delete_query('settinggroups', "name = 'lists'");
+
+	rebuild_settings();
+
+    // drop css
+    require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
+    $db->delete_query("themestylesheets", "name = 'lists.css'");
+    $query = $db->simple_select("themes", "tid");
+    while($theme = $db->fetch_array($query)) {
+        update_theme_stylesheet_list($theme['tid']);
+    }
+
 }
 
 function lists_deactivate() {

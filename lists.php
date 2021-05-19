@@ -5,6 +5,12 @@ define('THIS_SCRIPT', 'lists.php');
 require_once "./global.php";
 $lang->load('lists');
 
+if($mybb->settings['lists_uids']) {
+$listsuids = $mybb->settings['lists_uids'];
+} else {
+    $listsuids = 0;
+}
+
 add_breadcrumb($lang->lists, "lists.php");
 
 $query = $db->simple_select("lists", "*");
@@ -22,6 +28,7 @@ if(!$mybb->input['action']) {
 $query = $db->simple_select("lists", "*");
 while($list = $db->fetch_array($query)) {
     if($mybb->input['action'] == $list['key']) {
+
         // Format Entries
         require_once MYBB_ROOT."inc/class_parser.php";
         $parser = new postParser;
@@ -32,9 +39,11 @@ while($list = $db->fetch_array($query)) {
             "allow_imgcode" => 1
         );
 
-        $list['text'] = $parser->parse_message($list['text'], $parser_options);    
+        $list['text'] = $parser->parse_message($list['text'], $parser_options);   
+
         // let's build queries! 
 
+        // special sort method?
         if(!empty($list['sortby'])) {
             $sort = $list['sortby'];
             if(!preg_match("/username/i", $list['sortby'])) {
@@ -42,10 +51,12 @@ while($list = $db->fetch_array($query)) {
             }
         } if(empty($list['sortby'])) { $sort = "username"; }
 
+        // filter by profilefield
         if(!preg_match("/-/i", $list['fid'])) {
             $fieldtype = get_fieldtype($list['fid']);
             $fid = "fid".$list['fid'];
 
+            // any filters? build query
             if(!empty($list['filter'])) {
                 $filter = $list['filter'];
                 $sql_filter = "AND " . $fid . " LIKE '%{$filter}%'";
@@ -62,6 +73,7 @@ while($list = $db->fetch_array($query)) {
                 while($result = $db->fetch_array($query_2)) {
                     $list_bit_user = "";
                     $resfid = $result[$fid];
+                    // no headline if we got a filter, because we already know what we're seeing, right?
                     if(!empty($filter)) {
                         $option = "";
                     } else {
@@ -74,6 +86,7 @@ while($list = $db->fetch_array($query)) {
                     WHERE uf.". $fid ." = '$resfid'
                     AND ug.showinlists = 1 "
                     . $sql_filter . " 
+                    AND ufid NOT IN($listsuids)
                     ORDER BY " . $sort ." ASC");
                     while($user_result = $db->fetch_array($query_3)) {
                         $extrainfo = "";
@@ -95,8 +108,10 @@ while($list = $db->fetch_array($query)) {
                 $options = explode("\n", $type);
                 array_shift($options);
                 foreach($options as $option) {
+                    // does this option match our filter?
                     if(preg_match("/$filter/i", $option)) {
                         $list_bit_user = "";
+                        // get users matching filter
                         $query_3 = $db->query("SELECT ufid, username FROM ".TABLE_PREFIX."userfields uf
                         LEFT JOIN ".TABLE_PREFIX."users u 
                         ON u.uid = uf.ufid
@@ -105,6 +120,7 @@ while($list = $db->fetch_array($query)) {
                         WHERE uf.". $fid ." LIKE '%$option%'
                         AND ug.showinlists = 1 "
                         . $sql_filter . " 
+                        AND ufid NOT IN($listsuids)
                         ORDER BY " . $sort . " ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
@@ -114,6 +130,7 @@ while($list = $db->fetch_array($query)) {
                             if($list['extras']) {
                                 $extrainfo = get_extras($user_result['ufid'], $list['extras']);
                             }
+                            // no headline if we got a filter, because we already know what we're seeing, right?
                             if(!empty($filter)) {
                                 $option = "";
                             }
@@ -124,29 +141,38 @@ while($list = $db->fetch_array($query)) {
                 }
             }
 
-        } else {
+        } 
+        // filter is not a profilefield
+        else {
+            // we're filtering by usergroup
             if($list['fid'] != -4) {
+                // get possible grouptypes
                 $grouptypes = ["-1" => "usergroup", "-2" => "additionalgroups", "-3" => "displaygroup"];
                 $group = $list['fid'];
                 $group = $grouptypes[$group];
+                // if there's a filter we only need one group
                 if(!empty($list['filter'])) {
                     $filter = $list['filter'];
                     $query_2 = $db->simple_select("usergroups", "title,gid", "title LIKE '%{$filter}%'");
                 } else {
+                    // if not, we need to get all groups that are supposed to show in lists
                     $query_2 = $db->simple_select("usergroups", "title,gid", "showinlists = '1'", ["order_by" => "title", "order_dir" => "ASC"]);
                 }
                 while($result = $db->fetch_array($query_2)) {
                     $list_bit_user = "";
                     $resfid = $result['title'];
                     $resgid = $result['gid'];
+                    // no headline if we got a filter, because we already know what we're seeing, right?
                     if(!empty($filter)) {
                         $option = "";
                     } else {
                     $option = $result['title']; }
+                    // get all users in this group
                     $query_3 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                         LEFT JOIN ".TABLE_PREFIX."userfields uf 
                         ON u.uid = uf.ufid
                         WHERE " . $group ." = '{$resgid}'
+                        AND uid NOT IN($listsuids)
                         ORDER BY " . $sort ." ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
@@ -160,7 +186,10 @@ while($list = $db->fetch_array($query)) {
                         }
                     eval("\$list_bit .= \"".$templates->get("lists_list_bit")."\";");
                 }
-            } else {
+            } 
+            // we're filtering by username
+            else {
+                // alphabetically ...
                 $query_2 = $db->query("SELECT uid, username FROM ".TABLE_PREFIX."users u
                 LEFT JOIN ".TABLE_PREFIX."usergroups ug
                 ON u.usergroup = ug.gid
@@ -169,6 +198,7 @@ while($list = $db->fetch_array($query)) {
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'A'
                 AND " . $sort . " <= 'F'
+                AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "A - F";
                 $list_bit_user = "";
@@ -193,6 +223,7 @@ while($list = $db->fetch_array($query)) {
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'G'
                 AND " . $sort . " <= 'L'
+                AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "G - L";
                 $list_bit_user = "";
@@ -216,9 +247,10 @@ while($list = $db->fetch_array($query)) {
                 ON u.uid = uf.ufid
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'M'
-                AND " . $sort . " <= 'R'
+                AND " . $sort . " <= 'S'
+                AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
-                $option = "M - R";
+                $option = "M - S";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
                     $profilelink = build_profile_link($result['username'], $result['uid']); 
@@ -241,6 +273,7 @@ while($list = $db->fetch_array($query)) {
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'T'
                 AND " . $sort . " <= 'Z'
+                AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "T - Z";
                 $list_bit_user = "";
@@ -263,29 +296,37 @@ while($list = $db->fetch_array($query)) {
     }
 }
 
+// get field type of profilefield
 function get_fieldtype($fid) {
     global $db;
     $fieldtype = $db->fetch_field($db->simple_select("profilefields", "type", "fid = '$fid'"), "type");
     if(preg_match("/select/i", $fieldtype) || preg_match("/checkbox/i", $fieldtype) || preg_match("/radio/i", $fieldtype)) {
+        // if type is list, first entry is fieldtype, so take that
         $types = explode("\n", $fieldtype);
         $fieldtype = array_shift($types);
     }
     return $fieldtype;
 }
 
+// get extra information
 function get_extras($uid, $extras) {
     global $db;
     $extralist = explode(",", $extras);
     $grouptypes = ["-1" => "usergroup", "-2" => "additionalgroups", "-3" => "displaygroup"];
     foreach($extralist as $extra) {
         $exfid = "fid".$extra;
+        // extra information is profilefield
         if(!preg_match("/-/i", $extra)) {
             $content = $db->fetch_field($db->simple_select("userfields", $exfid, "ufid = {$uid}"), $exfid);
             if(!empty($content)) {
                 $extrainfo .= "&raquo; " . $content . " ";
             }
-        } else {
+        } 
+        // it's either usergroup or username
+        else {
+            // it's usergroup. username would be useless
             if($extra != -4) {
+                // get groups user is in
                 $group = $grouptypes[$extra];
                 $groupid = $db->fetch_field($db->simple_select("users", $group, "uid = '{$uid}'"), $group);
                 if($extra == -2 && !empty($groupid)) {
