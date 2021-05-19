@@ -58,6 +58,7 @@ while($list = $db->fetch_array($query)) {
                     while($user_result = $db->fetch_array($query_3)) {
                         $extrainfo = "";
                         $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
+                        $listuser = get_user($user_result['ufid']);
                         // any extra information required? 
                         if($list['extras']) {
                             $extrainfo = get_extras($user_result['ufid'], $list['extras']);
@@ -87,6 +88,7 @@ while($list = $db->fetch_array($query)) {
                     while($user_result = $db->fetch_array($query_3)) {
                         $extrainfo = "";
                         $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
+                        $listuser = get_user($user_result['ufid']);
                         // any extra information required? 
                         if($list['extras']) {
                             $extrainfo = get_extras($user_result['ufid'], $list['extras']);
@@ -119,6 +121,7 @@ while($list = $db->fetch_array($query)) {
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
                             $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
+                            $listuser = get_user($user_result['uid']);
                             // any extra information required? 
                             if($list['extras']) {
                                 $extrainfo = get_extras($user_result['uid'], $list['extras']);
@@ -139,6 +142,7 @@ while($list = $db->fetch_array($query)) {
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
                     $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    $listuser = get_user($result['uid']);
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -158,6 +162,7 @@ while($list = $db->fetch_array($query)) {
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
                     $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    $listuser = get_user($result['uid']);
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -177,6 +182,7 @@ while($list = $db->fetch_array($query)) {
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
                     $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    $listuser = get_user($result['uid']);
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -196,6 +202,7 @@ while($list = $db->fetch_array($query)) {
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
                     $profilelink = build_profile_link($result['username'], $result['uid']); 
+                    $listuser = get_user($result['uid']);
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
