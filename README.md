@@ -35,11 +35,11 @@ Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt
 Hi!
 Anbei ein paar Kurzanleitungen zu dem Plugin. Generell gilt: tobt euch aus, probiert die Funktionen aus! (So gut wie) jede Liste ist <em>irgendwie</em> möglich. Die Handhabung setzt vielleicht etwas Übung voraus, aber wenn ihr einfach mal rumspielt und Listen erstellt, habt ihr schon bald den Dreh raus! ♫ Anbei also ein paar Beispiele um zu verstehen, wie das Ganze so funktionieren kann.
 
-<a href="#hogwarts">Hogwarts-Häuser</a>
-<a href="#patronus">Patronus</a>
-<a href="#weristwer">Wer ist wer?</a>
-<a href="#extern">Externe Listen an Navigation anfügen</a>
-<a href="#eigene">Eigene/Spezielle Listen an die lists.php anfügen</a>
+<a href="#hogwarts">Hogwarts-Häuser</a><br />
+<a href="#patronus">Patronus</a><br />
+<a href="#weristwer">Wer ist wer?</a><br />
+<a href="#extern">Externe Listen an Navigation anfügen</a><br />
+<a href="#eigene">Eigene/Spezielle Listen an die lists.php anfügen</a><br />
 
 <h1 id="hogwarts">Beispiel: Hogwarts-Häuser</h1>
 
@@ -51,10 +51,10 @@ Bild ist anklickbar!</center>
 Diese Art von Liste ermöglicht es euch, die Liste direkt mit einem Info-Text zum jeweiligen Hogwartshaus zu versehen, zeitgleich aber auch eine Darstellung aller Charaktere in diesem Hogwartshaus zu bieten. Diese Liste kann demnach nicht nur als Übersicht gelten, sondern auch als Informationsquelle für eure User. 
 
 <h2>Benötigte Profilfelder</h2>
-[list]
-[*]Hogwarts-Haus (Auswahlbox)
-[*]Schulklasse (Auswahlbox)
-[/list]
+<ul>
+<li>Hogwarts-Haus (Auswahlbox)
+<li>Schulklasse (Auswahlbox)
+</ul>
 
 Für das Feld Hogwarts-Haus hinterlegt ihr (logisch) die vier möglichen Häuser.
 Im Feld Schulklasse hinterlegt ihr als mögliche Auswahl die sieben Schulklassen.
@@ -128,10 +128,10 @@ Na - das war einfach, oder? Übrigens könnt ihr so nicht nur auf ein Profilfeld
 <h2>Weitere Listen-Ideen</h2>
 Nicht so der magische Typ? Kein Problem, die Anleitung lässt sich auch auf andere Ideen übertragen!
 
-[list]
-[*]Fantasy-Rassenliste & dazugehörige Charaktere
-[*]Quidditchmannschaften (Haus als Eigenschaft, Position als Extra-Information) 
-[/list]
+<ul>
+<li>Fantasy-Rassenliste & dazugehörige Charaktere
+<li>Quidditchmannschaften (Haus als Eigenschaft, Position als Extra-Information) 
+</ul>
 
 <h1 id="extern">Externe Listen an Navigation anhängen</h1>
 Man hat gern alle Listen an einem Platz ... auch das ist möglich - na ja, zumindest kann man so tun. Ihr habt ein Avatarlistenplugin installiert? Oder eine automatische Wer ist Wer-Liste gibt es schon und ihr wollt sie nicht über mein Plugin generieren? 
