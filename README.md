@@ -1,6 +1,7 @@
 # Automatische Listen 1.0
 Ermöglicht das Generieren automatischer Listen aus dem Admin CP heraus. 
 Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt werden.
+<p>Vielen Dank an Tom (White_Rabbit) für die Mühe beim Testen und Designen des Plugins!</p>
 
 # Funktionen
 <ul>
