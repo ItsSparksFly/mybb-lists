@@ -1,6 +1,7 @@
 # Automatische Listen 1.0
 Ermöglicht das Generieren automatischer Listen aus dem Admin CP heraus. 
 Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt werden.
+<p>Vielen Dank an Tom (White_Rabbit) für die Mühe beim Testen und Designen des Plugins!</p>
 
 # Funktionen
 <ul>
@@ -45,7 +46,7 @@ Anbei ein paar Kurzanleitungen zu dem Plugin. Generell gilt: tobt euch aus, prob
 
 In diesem Beispiel möchte ich euch zeigen, wie ihr mit dem Automatische Listen-Plugin eine Übersicht der Hogwarts-Häuser erstellt.
 
-<center><a href="https://snipboard.io/NkEbzs.jpg">[img]https://snipboard.io/NkEbzs.jpg[/img]</a>
+<center><a href="https://snipboard.io/NkEbzs.jpg"><img src="https://snipboard.io/NkEbzs.jpg" /></a>
 Bild ist anklickbar!</center>
 
 Diese Art von Liste ermöglicht es euch, die Liste direkt mit einem Info-Text zum jeweiligen Hogwartshaus zu versehen, zeitgleich aber auch eine Darstellung aller Charaktere in diesem Hogwartshaus zu bieten. Diese Liste kann demnach nicht nur als Übersicht gelten, sondern auch als Informationsquelle für eure User. 
