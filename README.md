@@ -18,6 +18,11 @@ Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt
 # Demo
 
 <center>
+  
+  <img src="https://snipboard.io/aFzL18.jpg" />
+  
+  <img src="https://snipboard.io/L8fX7K.jpg" />
+  
   <img src="https://snipboard.io/RgMUqm.jpg" />
   
   <img src="https://snipboard.io/ZFkuEl.jpg" />
@@ -26,5 +31,4 @@ Die Automatischen Listen können anhand von Profilfeldern & Usergruppen erstellt
   
   <img src="https://snipboard.io/lvIGgj.jpg" />
   
-  <img src="https://snipboard.io/L8fX7K.jpg" />
 </center>
