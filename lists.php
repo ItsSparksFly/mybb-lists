@@ -58,8 +58,12 @@ while($list = $db->fetch_array($query)) {
 
             // any filters? build query
             if(!empty($list['filter'])) {
-                $filter = $list['filter'];
+                $filter = $db->escape_string($list['filter']); 
                 $sql_filter = "AND " . $fid . " LIKE '%{$filter}%'";
+                if($filter == "male") {
+                    $sql_filter = "AND " . $fid . " LIKE '%{$filter}%'
+                    AND " . $fid . " != 'female'";
+                }
             }
 
             // field is text(area), so we want to group entries first
@@ -72,7 +76,7 @@ while($list = $db->fetch_array($query)) {
                 // now get users matching entry
                 while($result = $db->fetch_array($query_2)) {
                     $list_bit_user = "";
-                    $resfid = $result[$fid];
+                    $resfid = $db->escape_string($result[$fid]);
                     // no headline if we got a filter, because we already know what we're seeing, right?
                     if(!empty($filter)) {
                         $option = "";
@@ -110,6 +114,11 @@ while($list = $db->fetch_array($query)) {
                 foreach($options as $option) {
                     // does this option match our filter?
                     if(preg_match("/$filter/i", $option)) {
+                        $genderfilter = "";
+                        $option = $db->escape_string($option);
+                        if($option == "Male" || $option == "male") {
+                            $genderfilter = "AND " . $fid . " NOT LIKE '%female%'";
+                        }
                         $list_bit_user = "";
                         // get users matching filter
                         $query_3 = $db->query("SELECT ufid, username FROM ".TABLE_PREFIX."userfields uf
@@ -120,7 +129,8 @@ while($list = $db->fetch_array($query)) {
                         WHERE uf.". $fid ." LIKE '%$option%'
                         AND ug.showinlists = 1 "
                         . $sql_filter . " 
-                        AND ufid NOT IN($listsuids)
+                        AND ufid NOT IN($listsuids) "
+                        . $genderfilter . " 
                         ORDER BY " . $sort . " ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
