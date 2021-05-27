@@ -93,9 +93,11 @@ while($list = $db->fetch_array($query)) {
                     AND ufid NOT IN($listsuids)
                     ORDER BY " . $sort ." ASC");
                     while($user_result = $db->fetch_array($query_3)) {
+                        $listuser = "";
                         $extrainfo = "";
-                        $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
                         $listuser = get_user($user_result['ufid']);
+                        $user_result['username'] = format_name(htmlspecialchars_uni($user_result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                        $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
                         // any extra information required? 
                         if($list['extras']) {
                             $extrainfo = get_extras($user_result['ufid'], $list['extras']);
@@ -134,8 +136,9 @@ while($list = $db->fetch_array($query)) {
                         ORDER BY " . $sort . " ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
-                            $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
                             $listuser = get_user($user_result['ufid']);
+                            $user_result['username'] = format_name(htmlspecialchars_uni($user_result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                            $profilelink = build_profile_link($user_result['username'], $user_result['ufid']);
                             // any extra information required? 
                             if($list['extras']) {
                                 $extrainfo = get_extras($user_result['ufid'], $list['extras']);
@@ -186,8 +189,9 @@ while($list = $db->fetch_array($query)) {
                         ORDER BY " . $sort ." ASC");
                         while($user_result = $db->fetch_array($query_3)) {
                             $extrainfo = "";
-                            $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
                             $listuser = get_user($user_result['uid']);
+                            $user_result['username'] = format_name(htmlspecialchars_uni($user_result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                            $profilelink = build_profile_link($user_result['username'], $user_result['uid']);
                             // any extra information required? 
                             if($list['extras']) {
                                 $extrainfo = get_extras($user_result['uid'], $list['extras']);
@@ -207,14 +211,15 @@ while($list = $db->fetch_array($query)) {
                 ON u.uid = uf.ufid
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'A'
-                AND " . $sort . " <= 'F'
+                AND " . $sort . " <= 'G'
                 AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "A - F";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
-                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     $listuser = get_user($result['uid']);
+                    $result['username'] = format_name(htmlspecialchars_uni($result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -232,14 +237,15 @@ while($list = $db->fetch_array($query)) {
                 ON u.uid = uf.ufid
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'G'
-                AND " . $sort . " <= 'L'
+                AND " . $sort . " <= 'M'
                 AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "G - L";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
-                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     $listuser = get_user($result['uid']);
+                    $result['username'] = format_name(htmlspecialchars_uni($result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -257,14 +263,15 @@ while($list = $db->fetch_array($query)) {
                 ON u.uid = uf.ufid
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'M'
-                AND " . $sort . " <= 'S'
+                AND " . $sort . " <= 'T'
                 AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "M - S";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
-                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     $listuser = get_user($result['uid']);
+                    $result['username'] = format_name(htmlspecialchars_uni($result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
@@ -283,13 +290,15 @@ while($list = $db->fetch_array($query)) {
                 WHERE showinlists = '1'
                 AND " . $sort . " >= 'T'
                 AND " . $sort . " <= 'Z'
+                OR " . $sort . " LIKE 'Z%'
                 AND uid NOT IN($listsuids)
                 ORDER by " . $sort . " ASC");
                 $option = "T - Z";
                 $list_bit_user = "";
                 while($result = $db->fetch_array($query_2)) {
-                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     $listuser = get_user($result['uid']);
+                    $result['username'] = format_name(htmlspecialchars_uni($result['username']), $listuser['usergroup'], $listuser['displaygroup']);
+                    $profilelink = build_profile_link($result['username'], $result['uid']); 
                     // any extra information required? 
                     if($list['extras']) {
                         $extrainfo = get_extras($result['uid'], $list['extras']);
